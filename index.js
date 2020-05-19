@@ -244,14 +244,59 @@ console.log("Stretch 3: getGoals() function below");
 console.log(getGoals(fifaData));
 
 
-/* Stretch 4: Write a function called badDefense() that accepts a parameter `data` and calculates the team with the most goals scored against them per appearance (average goals against) in the World Cup finals */
+/* Stretch 4: Write a function called badDefense() that accepts a parameter `data` and calculates the team with the most goals scored against them per appearance
+    (average goals against) in the World Cup finals */
 
-function badDefense(/* code here */) {
-
-    /* code here */
-
+function badDefense(data) {
+    let uniqueCountries = [];
+    let badCountry = "";
+    let badGoals = 0;
+    
+    data.forEach(function(teams) {
+        if(uniqueCountries.length > 0) {
+            let homeCountry = false;
+            let awayCountry = false;
+            for(let i = 0; i < uniqueCountries.length; i++) {
+                if(uniqueCountries[i] === teams['Home Team Name']) homeCountry = true;
+                if(uniqueCountries[i] === teams['Away Team Name']) awayCountry = true;
+            }
+            if(!homeCountry) {
+                uniqueCountries.push(teams['Home Team Name']);
+            }
+            if(!awayCountry) {
+                uniqueCountries.push(teams['Away Team Name']);
+            }
+        } else {
+            uniqueCountries.push(teams['Home Team Name']);
+            uniqueCountries.push(teams['Away Team Name']);
+        }
+    });
+    // I should now have an array of Unique Country names
+    
+    for(let country = 0; country < uniqueCountries.length; country++) {
+        let gamesTeamPlayed = 0;
+        let goalsCounted = data.reduce(function(accumulatedGoals, currentGoals) {
+            if(uniqueCountries[country] === currentGoals['Home Team Name']) {
+                gamesTeamPlayed++;
+                return accumulatedGoals + currentGoals['Away Team Goals'];
+            } else if(uniqueCountries[country] === currentGoals['Away Team Name']) {
+                gamesTeamPlayed++;
+                return accumulatedGoals + currentGoals['Home Team Goals'];
+            } else {
+                return accumulatedGoals + 0;
+            }
+        }, 0);
+        // I should have total Goals and total games played at this point
+        if((goalsCounted / gamesTeamPlayed) > badGoals) {
+            // New Record! Update variables
+            badCountry = uniqueCountries[country];
+            badGoals = Number(Math.round((goalsCounted / gamesTeamPlayed)+'e2')+'e-2');
+        }
+    }
+    
+    return "" + badCountry + " is the country with the highest average points scored against them per game at " + badGoals + " points.";
 };
-
-badDefense();
+console.log("Stretch 4: badDefense() function below");
+console.log(badDefense(fifaData));
 
 /* If you still have time, use the space below to work on any stretch goals of your chosing as listed in the README file. */
