@@ -151,24 +151,97 @@ console.log(getAverageGoals(fifaData));
 Hint: Investigate your data to find "team initials"!
 Hint: use `.reduce` */
 
-function getCountryWins(/* code here */) {
+function getCountryWins(data, teamInitials) {
+    const gamesPlayed = data.filter(function(localTeam) {
+        return ((localTeam['Home Team Initials'] === teamInitials) || (localTeam['Away Team Initials'] === teamInitials));
+    });
 
-    /* code here */
+    const totalWins = gamesPlayed.reduce(function(gamesWon, playingTeam) {
+        if((playingTeam['Home Team Initials'] === teamInitials) && (playingTeam['Home Team Goals'] > playingTeam['Away Team Goals'])) {
+            return gamesWon + 1;
+        } else if((playingTeam['Away Team Initials'] === teamInitials) && (playingTeam['Home Team Goals'] < playingTeam['Away Team Goals'])) {
+            return gamesWon + 1;
+        } else if(playingTeam['Home Team Goals'] === playingTeam['Away Team Goals']) {
+            let winConditions = playingTeam['Win conditions'];
+            let teamName = "";
 
+            if(playingTeam['Home Team Initials'] === teamInitials) {
+                teamName = playingTeam['Home Team Name'];
+            } else {
+                teamName = playingTeam['Away Team Name'];
+            }
+
+            if(winConditions.includes(teamName) > -1) {
+                return gamesWon + 1;
+            } else {
+                return gamesWon + 0;
+            }
+        } else {
+            return gamesWon + 0;
+        }
+    }, 0);
+
+    return totalWins;
+}
+console.log("Stretch 1: getCountryWins() function using 'ITA' below");
+console.log(getCountryWins(fifaData, "ITA"));
+
+console.log("Does this count?\nStretch 2 is done!");
+
+/* Stretch 3: Write a function called getGoals() that accepts a parameter `data` and returns the team with the most goals score per appearance
+    (average goals for) in the World Cup finals */
+
+function getGoals(data) {
+    let uniqueCountries = [];
+    let recordCountry = "";
+    let recordAvgGoals = 0;
+
+    data.forEach(function(teams) {
+        if(uniqueCountries.length > 0) {
+            let homeCountry = false;
+            let awayCountry = false;
+            for(let i = 0; i < uniqueCountries.length; i++) {
+                if(uniqueCountries[i] === teams['Home Team Name']) homeCountry = true;
+                if(uniqueCountries[i] === teams['Away Team Name']) awayCountry = true;
+            }
+            if(!homeCountry) {
+                uniqueCountries.push(teams['Home Team Name']);
+            }
+            if(!awayCountry) {
+                uniqueCountries.push(teams['Away Team Name']);
+            }
+        } else {
+            uniqueCountries.push(teams['Home Team Name']);
+            uniqueCountries.push(teams['Away Team Name']);
+        }
+    });
+    // I should now have an array of Unique Country names
+
+    for(let country = 0; country < uniqueCountries.length; country++) {
+        let gamesTeamPlayed = 0;
+        let goalsCounted = data.reduce(function(accumulatedGoals, currentGoals) {
+            if(uniqueCountries[country] === currentGoals['Home Team Name']) {
+                gamesTeamPlayed++;
+                return accumulatedGoals + currentGoals['Home Team Goals'];
+            } else if(uniqueCountries[country] === currentGoals['Away Team Name']) {
+                gamesTeamPlayed++;
+                return accumulatedGoals + currentGoals['Away Team Goals'];
+            } else {
+                return accumulatedGoals + 0;
+            }
+        }, 0);
+        // I should have total Goals and total games played at this point
+        if((goalsCounted / gamesTeamPlayed) > recordAvgGoals) {
+            // New Record! Update variables
+            recordCountry = uniqueCountries[country];
+            recordAvgGoals = Number(Math.round((goalsCounted / gamesTeamPlayed)+'e2')+'e-2');
+        }
+    }
+
+    return "" + recordCountry + " is the country with the highest average points scored per game at " + recordAvgGoals + " points.";
 };
-
-getCountryWins();
-
-
-/* Stretch 3: Write a function called getGoals() that accepts a parameter `data` and returns the team with the most goals score per appearance (average goals for) in the World Cup finals */
-
-function getGoals(/* code here */) {
-
-    /* code here */
-
-};
-
-getGoals();
+console.log("Stretch 3: getGoals() function below");
+console.log(getGoals(fifaData));
 
 
 /* Stretch 4: Write a function called badDefense() that accepts a parameter `data` and calculates the team with the most goals scored against them per appearance (average goals against) in the World Cup finals */
